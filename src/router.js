@@ -1,44 +1,66 @@
-
-import { createRouter, createWebHistory } from 'vue-router';
-import Dashboard from '@/components/Dashboard.vue';
-import Profile from '@/components/Profile.vue';
-import Login from '@/components/Login.vue';
-import PageNotFound from '@/components/PageNotFound.vue';
-import store from './store';
+import { createRouter, createWebHistory } from "vue-router";
+import Dashboard from "@/pages/backend/Dashboard.vue";
+import Login from "@/pages/auth/Login.vue";
+import Register from "@/pages/auth/Register.vue";
+import PageNotFound from "@/components/PageNotFound.vue";
+import BackendLayout from "@/pages/backend/layouts/Layout.vue";
+import FrontendLayout from "@/pages/frontend/layouts/FrontendLayout.vue";
+import Home from "@/pages/frontend/Home.vue";
+import Video from "@/pages/frontend/Video.vue";
+import { useAuthStore } from "./store/auth";
 
 const routes = [
     {
-        path: '/',
-        redirect: '/dashboard',
-    },
-    {
-        path: '/login',
-        name: 'Login',
+        path: "/login",
+        name: "Login",
         component: Login,
         meta: {
-            guest: true, // This route is accessible only for guests
-        },
+            guest: true
+        }
     },
     {
-        path: '/',
+        path: "/register",
+        name: "Register",
+        component: Register,
+        meta: {
+            guest: true
+        }
+    },
+    {
+        path: "/",
+        component: FrontendLayout,
+        meta: {
+            auth: true
+        },
+        children: [
+            {
+                path: "/",
+                name: "Home",
+                component: Home,
+            },
+            {
+                path: "/video/:id",
+                name: "Video",
+                component: Video,
+            },
+        ],
+    },
+    {
+        path: "/admin",
+        component: BackendLayout,
         meta: {
             auth: true, // This applies to all child routes
         },
         children: [
             {
-                path: 'dashboard',
-                name: 'Dashboard',
+                path: "dashboard",
+                name: "Dashboard",
                 component: Dashboard,
-            },
-            {
-                path: 'profile',
-                name: 'Profile',
-                component: Profile,
             },
         ],
     },
     {
-        path: '/:catchAll(.*)',
+        path: "/:catchAll(.*)",
         component: PageNotFound,
     },
 ];
@@ -46,23 +68,29 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        return { top: 0 };
+    },
 });
 
-// Global navigation guard
+//Global navigation guard
 router.beforeEach((to, from, next) => {
-    const tokenValue = store.state.token;
-    const isLoggedIn = tokenValue ? true : false;
-    if (to.meta.auth && !isLoggedIn) {
-        // If the route requires authentication and the user is not logged in
+    NProgress.start();
+    const authStore = useAuthStore();
+    const token = authStore.user ? authStore.user.token : '';
+    if (to.meta.auth && !token) {
         next({ path: '/login' });
-    } else if (to.meta.guest && isLoggedIn) {
-        // If the route is for guests and the user is logged in
-        next({ path: '/dashboard' });
+    } else if (to.meta.guest && token) {
+        next({ path: '/' });
     } else {
-        // If none of the above conditions are met, allow access
         next();
     }
 });
 
+router.afterEach((to, from) => {
+    setTimeout(() => {
+        NProgress.done();
+    }, 500);
+})
 
 export default router;
