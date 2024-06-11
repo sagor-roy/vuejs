@@ -22,14 +22,14 @@
           <div
             class="bg-purple-100 my-4 inline-flex text-purple-500 items-center py-3 px-4 gap-x-3 rounded-full"
           >
-            <button class="flex items-center gap-x-1">
-              <span class="material-symbols-outlined">thumb_up</span
-              ><span>5k</span>
+            <button @click="likeHandler(videos?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
+              <span :class="videos?.like_dislike?.auth_user_like?.like == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_up</span
+              ><span>{{ videos?.like_dislike?.total_like }}</span>
             </button>
             |
-            <button class="flex items-center gap-x-1">
-              <span class="material-symbols-outlined">thumb_down</span
-              ><span>2k</span>
+            <button @click="dislikeHandler(videos?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
+              <span :class="videos?.like_dislike?.auth_user_like?.dislike == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_down</span
+              ><span>{{ videos?.like_dislike?.total_dislike }}</span>
             </button>
           </div>
 
@@ -57,157 +57,7 @@
                 </button>
               </form>
             </div>
-
-            <div class="flex text-purple-500 gap-x-2 my-2">
-              <span class="material-symbols-outlined text-purple-500 text-3xl"
-                >account_circle</span
-              >
-              <div class="">
-                <h1 class="font-semibold text-lg mt-1">
-                  @John Doe <span class="text-xs font-normal">1 year ago</span>
-                </h1>
-                <p class="text-sm italic mt-1">
-                  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Fuga
-                  quidem, modi provident a dolor inventore similique sint
-                  voluptatum deserunt cupiditate!
-                </p>
-                <div class="flex gap-x-3 mt-4">
-                  <button class="flex items-center gap-x-1">
-                    <span class="material-symbols-outlined">thumb_up</span
-                    ><span>2.4k</span>
-                  </button>
-                  <button class="flex items-center gap-x-1">
-                    <span class="material-symbols-outlined">thumb_down</span
-                    ><span>1k</span>
-                  </button>
-                  <button class="flex items-center gap-x-1">Reply</button>
-                </div>
-                <div class="flex items-start mt-4 gap-x-2">
-                  <span
-                    class="material-symbols-outlined text-purple-500 text-4xl"
-                    >account_circle</span
-                  >
-                  <form class="flex flex-col gap-y-3 items-end w-full">
-                    <input
-                      type="text"
-                      class="outline-none placeholder-purple-500 p-2 text-sm w-full text-purple-500 border-b-2 border-purple-500"
-                      placeholder="Add a Comment...."
-                    />
-                    <button
-                      type="submit"
-                      class="bg-purple-300 text-purple-600 w-36 px-3 py-2 rounded-full"
-                    >
-                      Comment
-                    </button>
-                  </form>
-                </div>
-                <button class="flex mt-2 items-center text-sm text-blue-500">
-                  <span class="material-symbols-outlined"
-                    >keyboard_arrow_down</span
-                  >
-                  <span>50 replies</span>
-                </button>
-
-                <div class="flex text-purple-500 gap-x-2">
-                  <span
-                    class="material-symbols-outlined text-purple-500 text-3xl"
-                    >account_circle</span
-                  >
-                  <div class="">
-                    <h1 class="font-semibold text-lg mt-1">
-                      @John Doe
-                      <span class="text-xs font-normal">1 year ago</span>
-                    </h1>
-                    <p class="text-sm italic mt-1">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      Fuga quidem, modi provident a dolor inventore similique
-                      sint voluptatum deserunt cupiditate!
-                    </p>
-                    <div class="flex gap-x-3 mt-4">
-                      <button class="flex items-center gap-x-1">
-                        <span class="material-symbols-outlined">thumb_up</span
-                        ><span>2.4k</span>
-                      </button>
-                      <button class="flex items-center gap-x-1">
-                        <span class="material-symbols-outlined">thumb_down</span
-                        ><span>1k</span>
-                      </button>
-                      <button class="flex items-center gap-x-1">Reply</button>
-                    </div>
-                    <div class="flex items-start mt-4 gap-x-2">
-                      <span
-                        class="material-symbols-outlined text-purple-500 text-4xl"
-                        >account_circle</span
-                      >
-                      <form class="flex flex-col gap-y-3 items-end w-full">
-                        <input
-                          type="text"
-                          class="outline-none placeholder-purple-500 p-2 text-sm w-full text-purple-500 border-b-2 border-purple-500"
-                          placeholder="Add a Comment...."
-                        />
-                        <button
-                          type="submit"
-                          class="bg-purple-300 text-purple-600 w-36 px-3 py-2 rounded-full"
-                        >
-                          Comment
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex text-purple-500 gap-x-2 my-2">
-              <span class="material-symbols-outlined text-purple-500 text-3xl"
-                >account_circle</span
-              >
-              <div class="">
-                <h1 class="font-semibold text-lg mt-1">
-                  @John Doe <span class="text-xs font-normal">1 year ago</span>
-                </h1>
-                <p class="text-sm italic mt-1">
-                  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Fuga
-                  quidem, modi provident a dolor inventore similique sint
-                  voluptatum deserunt cupiditate!
-                </p>
-                <div class="flex gap-x-3 mt-4">
-                  <button class="flex items-center gap-x-1">
-                    <span class="material-symbols-outlined">thumb_up</span
-                    ><span>2.4k</span>
-                  </button>
-                  <button class="flex items-center gap-x-1">
-                    <span class="material-symbols-outlined">thumb_down</span
-                    ><span>1k</span>
-                  </button>
-                  <button class="flex items-center gap-x-1">Reply</button>
-                </div>
-                <div class="flex items-start mt-4 gap-x-2">
-                  <span
-                    class="material-symbols-outlined text-purple-500 text-4xl"
-                    >account_circle</span
-                  >
-                  <form class="flex flex-col gap-y-3 items-end w-full">
-                    <input
-                      type="text"
-                      class="outline-none placeholder-purple-500 p-2 text-sm w-full text-purple-500 border-b-2 border-purple-500"
-                      placeholder="Add a Comment...."
-                    />
-                    <button
-                      type="submit"
-                      class="bg-purple-300 text-purple-600 w-36 px-3 py-2 rounded-full"
-                    >
-                      Comment
-                    </button>
-                  </form>
-                </div>
-                <button class="flex mt-2 items-center text-sm text-blue-500">
-                  <span class="material-symbols-outlined"
-                    >keyboard_arrow_down</span
-                  >
-                  <span>50 replies</span>
-                </button>
-              </div>
-            </div>
+            <Commenet v-for="comment in videos.comments" :key="comment.id" :comment="comment" :parentUserName="null" />
           </div>
         </div>
       </div>
@@ -215,9 +65,7 @@
         class="flex flex-col col-span-6 lg:col-span-2 items-start lg:items-center divide-y divide-purple-500 bg-purple-100 p-4 shadow-lg rounded-lg gap-y-3"
       >
         <router-link :to="`/video/${single.video_id}`" v-for="single in videos.another_videos" class="flex gap-x-3 relative" :key="single.id">
-          <!-- <div v-if="single.video_id === videoId" class="absolute bg-purple-200 p-1">
-            <span>Played</span>
-          </div> -->
+          
           <div v-if="single.video_id === videoId" class="now playing">
             <span class="bar n1">A</span>
             <span class="bar n2">B</span>
@@ -246,6 +94,7 @@ import { apiService } from '@/axios/apiService';
 import { useAuthStore } from '@/store/auth';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import Commenet from '@/components/Comment.vue'
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -259,7 +108,8 @@ const fetchData = async (video_id) => {
     if (response.data.status === 'success') {
       videos.value = response.data.data;
     } else {
-      alert(response.data.message);
+      //alert(response.data.message);
+      console.log(response.data);
     }
   } catch (error) {
     if (error.response && error.response.status === 404) {
@@ -268,7 +118,7 @@ const fetchData = async (video_id) => {
       authStore.removeUserWithToken();
       router.push({ path: '/login' });
     } else {
-      console.error('Error fetching data:', error);
+      console.log(error);
       alert('An error occurred while fetching data.');
     }
   }
@@ -285,6 +135,38 @@ watch(
     fetchData(newId);
   }
 );
+
+const handleLikeDislike = async (user, action) => {
+  const isLike = action === 'like';
+  const isDislike = action === 'dislike';
+  try {
+    const response = await apiService.post(`/like-dislike`, {
+      like: isLike ? (user.like === 1 ? 0 : 1) : (user.like === 1 ? 0 : user.like),
+      dislike: isDislike ? (user.dislike === 1 ? 0 : 1) : (user.dislike === 1 ? 0 : user.dislike),
+      videoId: user.video_id
+    });
+    if (response.data.status === 'success') {
+      console.log(response.data);
+      fetchData(videoId.value);
+    } else {
+      //alert(response.data.message);
+      console.log(response.data);
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      authStore.removeUserWithToken();
+      router.push({ path: '/login' });
+    } else {
+      console.log(error);
+      alert('An error occurred while fetching data.');
+    }
+  }
+};
+
+const likeHandler = (user) => handleLikeDislike(user, 'like');
+const dislikeHandler = (user) => handleLikeDislike(user, 'dislike');
+
+
 
 </script>
 

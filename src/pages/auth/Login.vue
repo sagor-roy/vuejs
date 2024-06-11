@@ -61,18 +61,13 @@ const submit = async () => {
         }
     } catch (error) {
         const response = error.response;
-        if (response && response.status === 401) {
+        if (response && response.status === 401 || response.status === 429) {
             unauthorizedMessage.value = response.data.message
             setTimeout(() => {
                 unauthorizedMessage.value = ""
             }, 5000);
         } else if (response && response.status === 422) {
             errors.value = response.data.data;
-        } else if (response && response.status === 429) {
-            unauthorizedMessage.value = response.data.message
-            setTimeout(() => {
-                unauthorizedMessage.value = ""
-            }, 5000);
         }
     } finally {
         submitBtn.value = false;
