@@ -1,7 +1,7 @@
 <template>
-    <div class="flex text-purple-500 relative gap-x-2 my-2">
+    <div class="flex pb-3 text-purple-500 relative gap-x-2 my-2">
         <span class="material-symbols-outlined text-purple-500 text-3xl">account_circle</span>
-        <div class="w-full relative">
+        <div class="w-full relative overflow-hidden">
             <h1 class="font-semibold text-lg mt-1">
                 @{{ comment.user_name }} <span class="text-xs font-normal">{{ comment.created_time }}</span>
             </h1>
@@ -29,7 +29,7 @@
                         class="outline-none placeholder-purple-500 p-2 text-sm w-full text-purple-500 border-b-2 border-purple-500"
                         placeholder="Add a Comment...." />
                     <div>
-                        <button @click="replyHandler" type="submit"
+                        <button @click="replyHandler" type="button"
                             class="bg-purple-400 text-purple-800 w-24 px-2 py-2 rounded-full me-3">
                             Cancel
                         </button>
@@ -50,6 +50,18 @@
                     :parentUserName="comment.user_name" />
             </template>
         </div>
+        <div v-if="user.user.id === comment.user_id" class="absolute right-0">
+            <span @click="commentEditPanelStatusHandler" class="material-symbols-outlined mt-2 cursor-pointer">
+                more_vert
+            </span>
+            <ul v-if="commentEditPanelStatus"
+                class="text-sm z-50 bg-purple-200 shadow-md rounded-md p-3 absolute right-0 w-24 flex flex-col gap-y-3">
+                <li><button @click="commentEditHandler(comment.comment)" class="flex items-center gap-x-1"><span
+                            class="material-symbols-outlined">edit</span>Edit</button></li>
+                <li><button @click="commentDeleteHandler(comment)" class="flex items-center gap-x-1"><span
+                            class="material-symbols-outlined">delete</span>Delete</button></li>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -62,7 +74,7 @@ import { apiService } from '@/axios/apiService';
 
 const authStore = useAuthStore();
 const commentStore = useCommentStore();
-const { addComment, fetchComments } = commentStore;
+const { addComment, fetchComments, updateComment } = commentStore;
 const { user } = storeToRefs(authStore);
 
 const props = defineProps(['comment', 'parentUserName']);
@@ -72,6 +84,8 @@ const parentUserName = ref(props.parentUserName);
 const repliesFormId = ref(false);
 const replyInput = ref("");
 const replyStatus = ref(false);
+const commentEditPanelStatus = ref(false);
+const commentCreateUpdateStatus = ref(false);
 
 watch(
     () => props.comment,
@@ -81,19 +95,41 @@ watch(
 );
 
 const replySubmitHandler = async (comment) => {
-    await addComment({ user_id: user.value.user.id, video_id: comment.video_id, comment: replyInput.value, parent_id: comment.id })
+    if (commentCreateUpdateStatus.value) {
+        await updateComment({ user_id: user.value.user.id, video_id: comment.video_id, comment: replyInput.value, parent_id: comment.parent_id }, comment?.id)
+        commentCreateUpdateStatus.value = !commentCreateUpdateStatus.value;
+        commentEditPanelStatus.value = false;
+    } else {
+        await addComment({ user_id: user.value.user.id, video_id: comment.video_id, comment: replyInput.value, parent_id: comment.id })
+    }
+
     replyInput.value = "";
     repliesFormId.value = false
     replyStatus.value = true
 }
 
 const replyHandler = () => repliesFormId.value = !repliesFormId.value;
+
+const commentEditHandler = (comment) => {
+    replyInput.value = comment;
+    repliesFormId.value = !repliesFormId.value;
+    commentCreateUpdateStatus.value = !commentCreateUpdateStatus.value
+};
+
+const commentDeleteHandler = async (comment) => {
+    try {
+        const response = await apiService.delete(`/comment/${comment?.id}`);
+        if (response.data.status === 'success') {
+            await fetchComments(comment?.video_id);
+        } else {
+            console.log(response.data);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const repliesHiddenShowHandler = () => replyStatus.value = !replyStatus.value;
-
-
-
-
-
 
 
 const handleLikeDislike = async (comment, action) => {
@@ -118,5 +154,7 @@ const handleLikeDislike = async (comment, action) => {
 
 const likeHandler = (comment) => handleLikeDislike(comment, 'like');
 const dislikeHandler = (comment) => handleLikeDislike(comment, 'dislike');
+
+const commentEditPanelStatusHandler = () => commentEditPanelStatus.value = !commentEditPanelStatus.value;
 
 </script>

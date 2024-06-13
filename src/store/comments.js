@@ -31,9 +31,23 @@ export const useCommentStore = defineStore('comment', () => {
         }
     };
 
+    const updateComment = async (commentData, commentId) => {
+        try {
+            const response = await apiService.put(`/comment/${commentId}`, commentData);
+            if (response.data.status === 'success') {
+                await fetchComments(commentData?.video_id);
+            } else {
+                console.log(response.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return {
         comments,
         fetchComments,
-        addComment
+        addComment,
+        updateComment
     };
 });
