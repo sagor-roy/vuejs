@@ -22,14 +22,14 @@
           <div
             class="bg-purple-100 my-4 inline-flex text-purple-500 items-center py-3 px-4 gap-x-3 rounded-full"
           >
-            <button @click="likeHandler(videos?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
-              <span :class="videos?.like_dislike?.auth_user_like?.like == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_up</span
-              ><span>{{ videos?.like_dislike?.total_like }}</span>
+            <button @click="likeHandler(comments?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
+              <span :class="comments?.like_dislike?.auth_user_like?.like == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_up</span
+              ><span>{{ comments?.like_dislike?.total_like > 0 ? comments?.like_dislike?.total_like : '' }}</span>
             </button>
             |
-            <button @click="dislikeHandler(videos?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
-              <span :class="videos?.like_dislike?.auth_user_like?.dislike == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_down</span
-              ><span>{{ videos?.like_dislike?.total_dislike }}</span>
+            <button @click="dislikeHandler(comments?.like_dislike?.auth_user_like)" type="button" class="flex items-center gap-x-1">
+              <span :class="comments?.like_dislike?.auth_user_like?.dislike == 1 ? 'material-icons': 'material-symbols-outlined'">thumb_down</span
+              ><span>{{ comments?.like_dislike?.total_dislike > 0 ? comments?.like_dislike?.total_dislike : '' }}</span>
             </button>
           </div>
 
@@ -38,13 +38,15 @@
           </div>
 
           <div class="mt-5">
-            <h1 class="font-bold text-2xl text-purple-500">2,550 Comments</h1>
+            <h1 class="font-bold text-2xl text-purple-500">{{ comments?.total_comments }} Comments</h1>
             <div class="flex items-start mt-4 gap-x-2">
               <span class="material-symbols-outlined text-purple-500 text-4xl"
                 >account_circle</span
               >
-              <form class="flex flex-col gap-y-3 items-end w-full">
+              <form @submit.prevent="commentSubmitHandler" class="flex flex-col gap-y-3 items-end w-full">
                 <input
+                v-model="commentInput"
+                required
                   type="text"
                   class="outline-none placeholder-purple-500 p-2 text-sm w-full text-purple-500 border-b-2 border-purple-500"
                   placeholder="Add a Comment...."
@@ -57,7 +59,7 @@
                 </button>
               </form>
             </div>
-            <Commenet v-for="comment in videos.comments" :key="comment.id" :comment="comment" :parentUserName="null" />
+            <Commenet v-for="comment in comments.comments" :key="comment.id" :comment="comment" :parentUserName="null" />
           </div>
         </div>
       </div>
@@ -95,20 +97,33 @@ import { useAuthStore } from '@/store/auth';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import Commenet from '@/components/Comment.vue'
+import { useCommentStore } from '@/store/comments';
+import { storeToRefs } from 'pinia';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+const commentStore = useCommentStore();
+const { fetchComments, addComment } = commentStore;
+const { comments } = storeToRefs(commentStore);
+
 
 const videos = ref([]);
 const videoId = ref(router.currentRoute.value.params.id);
+const commentInput = ref("");
+
+const commentSubmitHandler = async () => {
+  await addComment({ user_id: user.value.user.id, video_id: videos.value?.details?.id, comment: commentInput.value })
+  commentInput.value = "";
+}
 
 const fetchData = async (video_id) => {
   try {
     const response = await apiService.get(`/videos/${video_id}`);
     if (response.data.status === 'success') {
       videos.value = response.data.data;
+      await fetchComments(response?.data?.data?.details?.id)
     } else {
-      //alert(response.data.message);
       console.log(response.data);
     }
   } catch (error) {
@@ -146,8 +161,7 @@ const handleLikeDislike = async (user, action) => {
       videoId: user.video_id
     });
     if (response.data.status === 'success') {
-      console.log(response.data);
-      fetchData(videoId.value);
+     await fetchComments(videos.value?.details?.id);
     } else {
       //alert(response.data.message);
       console.log(response.data);

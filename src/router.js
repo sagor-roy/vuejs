@@ -49,7 +49,7 @@ const routes = [
         path: "/admin",
         component: BackendLayout,
         meta: {
-            auth: true, // This applies to all child routes
+            auth: false, // This applies to all child routes
         },
         children: [
             {
