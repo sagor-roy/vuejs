@@ -108,12 +108,16 @@ const replySubmitHandler = async (comment) => {
     replyStatus.value = true
 }
 
-const replyHandler = () => repliesFormId.value = !repliesFormId.value;
+const replyHandler = () => {
+    replyInput.value = "";
+    repliesFormId.value = !repliesFormId.value
+    commentCreateUpdateStatus.value = false;
+};
 
 const commentEditHandler = (comment) => {
     replyInput.value = comment;
     repliesFormId.value = !repliesFormId.value;
-    commentCreateUpdateStatus.value = !commentCreateUpdateStatus.value
+    commentCreateUpdateStatus.value = !commentCreateUpdateStatus.value;
 };
 
 const commentDeleteHandler = async (comment) => {

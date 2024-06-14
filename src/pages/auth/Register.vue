@@ -63,9 +63,14 @@ const submit = async () => {
     try {
         const response = await apiService.post(`/register`, { name: name.value, email: email.value, password: password.value, password_confirmation: password_confirmation.value });
         if (response.data.status === 'success') {
-            localStorage.setItem('_user', JSON.stringify(response.data.data));
-            userWithTokenStore(response.data.data);
-            router.push({path: '/'});
+            const userWithToken = response.data.data;
+            localStorage.setItem('_user', JSON.stringify(userWithToken));
+            userWithTokenStore(userWithToken);
+            if (userWithToken?.user?.role === 'user') {
+                router.push({ path: '/' })
+            } else {
+                router.push({ path: '/admin/dashboard' })
+            }
         } else {
             alert(response.data.message);
         }

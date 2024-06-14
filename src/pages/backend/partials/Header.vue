@@ -7,7 +7,7 @@
                         <!-- <template v-if="isLoggedIn"> -->
                             <li><router-link to="/">Dashboard</router-link></li>
                             <li><router-link to="/profile">Profile</router-link></li>
-                            <li><button @click="logout"
+                            <li><button
                                     class="bg-purple-400 px-2 py-1 rounded-lg border-purple-500">Logout</button>
                             </li>
                         <!-- </template> -->
@@ -17,20 +17,6 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const store = useStore();
-
-
-const logout = () => {
-    localStorage.removeItem('token');
-    store.commit('clearToken');
-    router.push({ path: '/login' });
-};
-
-
 </script>
 <style lang="">
 

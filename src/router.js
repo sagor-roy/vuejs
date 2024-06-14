@@ -1,19 +1,13 @@
+// Import necessary dependencies
 import { createRouter, createWebHistory } from "vue-router";
-import Dashboard from "@/pages/backend/Dashboard.vue";
-import Login from "@/pages/auth/Login.vue";
-import Register from "@/pages/auth/Register.vue";
-import PageNotFound from "@/components/PageNotFound.vue";
-import BackendLayout from "@/pages/backend/layouts/Layout.vue";
-import FrontendLayout from "@/pages/frontend/layouts/FrontendLayout.vue";
-import Home from "@/pages/frontend/Home.vue";
-import Video from "@/pages/frontend/Video.vue";
-import { useAuthStore } from "./store/auth";
+import { useAuthStore } from "@/store/auth";
 
+// Define routes
 const routes = [
     {
         path: "/login",
         name: "Login",
-        component: Login,
+        component: () => import("@/pages/auth/Login.vue"),
         meta: {
             guest: true
         }
@@ -21,50 +15,53 @@ const routes = [
     {
         path: "/register",
         name: "Register",
-        component: Register,
+        component: () => import("@/pages/auth/Register.vue"),
         meta: {
             guest: true
         }
     },
     {
         path: "/",
-        component: FrontendLayout,
+        component: () => import("@/pages/frontend/layouts/FrontendLayout.vue"),
         meta: {
             auth: true
         },
         children: [
             {
-                path: "/",
+                path: "",
                 name: "Home",
-                component: Home,
+                component: () => import("@/pages/frontend/Home.vue"),
             },
             {
-                path: "/video/:id",
+                path: "video/:id",
                 name: "Video",
-                component: Video,
+                component: () => import("@/pages/frontend/Video.vue"),
             },
         ],
     },
     {
         path: "/admin",
-        component: BackendLayout,
+        redirect: '/admin/dashboard',
+        component: () => import("@/pages/backend/layouts/Layout.vue"),
         meta: {
-            auth: false, // This applies to all child routes
+            auth: true,
+            admin: true
         },
         children: [
             {
                 path: "dashboard",
                 name: "Dashboard",
-                component: Dashboard,
+                component: () => import("@/pages/backend/Dashboard.vue"),
             },
         ],
     },
     {
         path: "/:catchAll(.*)",
-        component: PageNotFound,
+        component: () => import("@/components/PageNotFound.vue"),
     },
 ];
 
+// Create router
 const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -73,24 +70,34 @@ const router = createRouter({
     },
 });
 
-//Global navigation guard
+// Global navigation guard
 router.beforeEach((to, from, next) => {
     NProgress.start();
     const authStore = useAuthStore();
-    const token = authStore.user ? authStore.user.token : '';
+    const user = authStore.user?.user;
+    const token = authStore.user?.token;
+
     if (to.meta.auth && !token) {
         next({ path: '/login' });
     } else if (to.meta.guest && token) {
-        next({ path: '/' });
+        if (user.role === 'admin') {
+            next({ path: '/admin/dashboard' });
+        } else {
+            next({ path: '/' });
+        }
+    } else if (to.meta.auth && token) {
+        if (to.meta.admin && user.role == 'user') {
+            next({ path: '/' });
+        } else {
+            next();
+        }
     } else {
         next();
     }
 });
 
-router.afterEach((to, from) => {
-    setTimeout(() => {
-        NProgress.done();
-    }, 500);
-})
+router.afterEach(() => {
+    NProgress.done();
+});
 
 export default router;
