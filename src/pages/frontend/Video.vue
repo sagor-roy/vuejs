@@ -113,7 +113,7 @@ const videoId = ref(router.currentRoute.value.params.id);
 const commentInput = ref("");
 
 const commentSubmitHandler = async () => {
-  await addComment({ user_id: user.value.user.id, video_id: videos.value?.details?.id, comment: commentInput.value })
+  await addComment({ user_id: user.value.user.id, video_id: videos.value?.details?.id, comment: commentInput.value, parent_id: null })
   commentInput.value = "";
 }
 

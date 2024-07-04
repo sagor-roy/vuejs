@@ -37,6 +37,16 @@ const routes = [
                 name: "Video",
                 component: () => import("@/pages/frontend/Video.vue"),
             },
+            {
+                path: "subscription",
+                name: "Subscription",
+                component: () => import("@/pages/frontend/Subscription.vue"),
+            },
+            // {
+            //     path: "checkout/:slug",
+            //     name: "Checkout",
+            //     component: () => import("@/pages/frontend/Checkout.vue"),
+            // },
         ],
     },
     {

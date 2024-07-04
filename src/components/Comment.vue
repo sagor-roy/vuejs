@@ -1,5 +1,5 @@
 <template>
-    <div class="flex pb-3 text-purple-500 relative gap-x-2 my-2">
+    <div class="flex pb-3 text-purple-500 relative gap-x-2 my-2" :id="`comment-${comment.id}`">
         <span class="material-symbols-outlined text-purple-500 text-3xl">account_circle</span>
         <div class="w-full relative overflow-hidden">
             <h1 class="font-semibold text-lg mt-1">
@@ -100,7 +100,7 @@ const replySubmitHandler = async (comment) => {
         commentCreateUpdateStatus.value = !commentCreateUpdateStatus.value;
         commentEditPanelStatus.value = false;
     } else {
-        await addComment({ user_id: user.value.user.id, video_id: comment.video_id, comment: replyInput.value, parent_id: comment.id })
+        await addComment({ user_id: user.value.user.id, video_id: comment.video_id, comment: replyInput.value, parent_id: comment.id, parent_user_id: comment.user_id })
     }
 
     replyInput.value = "";

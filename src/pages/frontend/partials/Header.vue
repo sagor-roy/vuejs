@@ -9,37 +9,58 @@
                 </svg>
                 <span class="text-2xl font-bold">JETFLIX</span>
             </router-link>
-            <div v-if="user" class="relative">
-                <div @click="toggle" class="flex items-center font-semibold gap-x-1 text-purple-700 cursor-pointer">
-                    <span class="material-symbols-outlined">
-                        account_circle
-                    </span>
-                    <h4>{{ user?.user?.name }}</h4>
-                    <span class="material-symbols-outlined">
-                        keyboard_arrow_down
-                    </span>
+
+            <div class="flex items-center gap-x-10">
+                <div class="relative text-purple-700 cursor-pointer">
+                    <span @click="notificationsShowHandler" class="material-symbols-outlined ">notifications</span>
+                    <span @click="notificationsShowHandler"
+                        class="absolute bg-purple-400 text-sm text-white py-0 -right-4 -top-3 px-2 rounded-full">{{
+                        unreadNotiCount }}</span>
+                    <ul v-if="notificationsPanelStatus"
+                        class="absolute w-60 bg-purple-300 p-3 rounded-md shadow-md divide-y divide-purple-600 space-y-2 text-sm z-50 right-0">
+                        <li v-for="(item, index) in noti" :key="index"><button @click="markAsReadHandler(item)"
+                                class="flex" :class="item.read_at ? '' : 'bg-purple-200 rounded-lg p-1'">
+                                <span class="material-symbols-outlined">account_circle</span>
+                                <div class="text-start">
+                                    <span class="text-purple-600 bg-purple-200 rounded-sm p-[1px_2px] italic">@{{
+                        item.data.sender_name }} </span>
+                                    <span> reply to your comment</span>
+                                </div>
+                            </button></li>
+                    </ul>
                 </div>
-                <ul :class="display ? 'flex' : 'hidden'"
-                    class="absolute bg-purple-100 z-10 w-40 gap-y-3 flex-col mt-3 p-3 rounded-md shadow-md">
-                    <li><a href="#" class="flex text-purple-500 items-center gap-x-1">
-                            <span class="material-symbols-outlined">
-                                person
-                            </span>
-                            <span>Profile</span>
-                        </a></li>
-                    <li><a href="#" class="flex text-purple-500 items-center gap-x-1">
-                            <span class="material-symbols-outlined">
-                                edit_square
-                            </span>
-                            <span>Edit</span>
-                        </a></li>
-                    <li><button type="button" @click="logout" class="flex text-purple-500 items-center gap-x-1">
-                            <span class="material-symbols-outlined">
-                                logout
-                            </span>
-                            <span>Logout</span>
-                        </button></li>
-                </ul>
+                <div v-if="user" class="relative">
+                    <div @click="toggle" class="flex items-center font-semibold gap-x-1 text-purple-700 cursor-pointer">
+                        <span class="material-symbols-outlined">
+                            account_circle
+                        </span>
+                        <h4>{{ user?.user?.name }}</h4>
+                        <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                        </span>
+                    </div>
+                    <ul :class="display ? 'flex' : 'hidden'"
+                        class="absolute bg-purple-100 z-10 w-40 gap-y-3 flex-col mt-3 p-3 rounded-md shadow-md">
+                        <li><a href="#" class="flex text-purple-500 items-center gap-x-1">
+                                <span class="material-symbols-outlined">
+                                    person
+                                </span>
+                                <span>Profile</span>
+                            </a></li>
+                        <li><a href="#" class="flex text-purple-500 items-center gap-x-1">
+                                <span class="material-symbols-outlined">
+                                    edit_square
+                                </span>
+                                <span>Edit</span>
+                            </a></li>
+                        <li><button type="button" @click="logout" class="flex text-purple-500 items-center gap-x-1">
+                                <span class="material-symbols-outlined">
+                                    logout
+                                </span>
+                                <span>Logout</span>
+                            </button></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
@@ -47,13 +68,65 @@
 <script setup>
 import { apiService } from '@/axios/apiService';
 import { useAuthStore } from '@/store/auth';
+import { useNotificationStore } from '@/store/notificatoin';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import Pusher from 'pusher-js';
 
 const authStore = useAuthStore();
+const notificationsStore = useNotificationStore();
+const { notifications } = storeToRefs(notificationsStore);
 const router = useRouter();
 const { user } = storeToRefs(authStore);
+const noti = ref([]);
+const unreadNotiCount = ref(0);
+const notificationsPanelStatus = ref(false)
+
+onMounted(async () => {
+    await fetchNotifications();
+})
+
+watch(
+    () => router.currentRoute.value.fullPath,
+    async () => {
+        await fetchNotifications();
+    }
+);
+
+const fetchNotifications = async () => {
+    await notificationsStore.fetchNotifications();
+    noti.value = notifications.value
+    unreadNotiCount.value = 0;
+    noti.value.forEach((item, index) => {
+        if (!item.read_at) {
+            unreadNotiCount.value++;
+        }
+    })
+}
+
+const notificationsShowHandler = () => notificationsPanelStatus.value = !notificationsPanelStatus.value;
+
+const markAsReadHandler = async (item) => {
+    try {
+        const response = await apiService.get(`/notification-read/${item.id}`);
+        if (response.data.status === 'success') {
+            await fetchNotifications();
+            router.push({ path: `/video/${item.data.video_slug_id}` });
+        } else {
+            alert(response.data.message);
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            authStore.removeUserWithToken();
+            router.push({ path: '/login' });
+        } else {
+            console.error('Error fetching data:', error);
+            alert('An error occurred while fetching data.');
+        }
+    }
+
+}
 
 const logout = async () => {
     try {
@@ -79,7 +152,7 @@ const display = ref(false);
 const toggle = () => {
     display.value = !display.value
 }
-</script>
-<style lang="">
 
-</style>
+
+
+</script>
